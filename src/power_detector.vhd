@@ -70,23 +70,24 @@ USE ieee.numeric_std.ALL;
 
 ENTITY power_detector IS 
 	GENERIC (
-		DATA_W 			: NATURAL := 16;
-		ALPHA_W 		: NATURAL := 16;
+		DATA_W 			: NATURAL := 12;
+		ALPHA_W 		: NATURAL := 18;
 		IQ_MOD 			: BOOLEAN := False;
 		I_USED 			: BOOLEAN := True;
 		Q_USED 			: BOOLEAN := False
 	);
 	PORT (
-		clk 				: IN  std_logic;
-		init 				: IN  std_logic;
+		clk				: IN  std_logic;
+		init			: IN  std_logic;
 
-		alpha 				: IN  std_logic_vector(ALPHA_W -1 DOWNTO 0);
+		alpha1			: IN  std_logic_vector(ALPHA_W -1 DOWNTO 0);
+		alpha2			: IN  std_logic_vector(ALPHA_W -1 DOWNTO 0);
 
-		data_I 				: IN  std_logic_vector(DATA_W -1 DOWNTO 0);
-		data_Q 				: IN  std_logic_vector(DATA_W -1 DOWNTO 0);
-		data_ena 			: IN  std_logic;
+		data_I			: IN  std_logic_vector(DATA_W -1 DOWNTO 0);
+		data_Q			: IN  std_logic_vector(DATA_W -1 DOWNTO 0);
+		data_ena		: IN  std_logic;
 
-		power_squared		: OUT std_logic_vector(DATA_W*2 -1 DOWNTO 0)
+		power_squared	: OUT std_logic_vector(2*DATA_W -2 DOWNTO 0)
 	);
 END ENTITY power_detector;
 
@@ -99,11 +100,12 @@ END ENTITY power_detector;
 
 ARCHITECTURE rtl OF power_detector IS 
 
-	SIGNAL di_sq	: unsigned(DATA_W*2 -1 DOWNTO 0);
-	SIGNAL dq_sq	: unsigned(DATA_W*2 -1 DOWNTO 0);
-	SIGNAL dsum 	: unsigned(DATA_W*2 -1 DOWNTO 0);
+	SIGNAL di_sq	: unsigned(2*DATA_W -2 DOWNTO 0);
+	SIGNAL dq_sq	: unsigned(2*DATA_W -2 DOWNTO 0);
+	SIGNAL dsum 	: unsigned(2*DATA_W -2 DOWNTO 0);
 	SIGNAL dsum_e1  : std_logic;
 	SIGNAL dsum_e2  : std_logic;
+	SIGNAL ema_1	: std_logic_vector(2*DATA_W -2 DOWNTO 0);
 
 BEGIN 
 
@@ -121,20 +123,20 @@ BEGIN
 				dsum_e1 <= data_ena;
 				dsum_e2 <= dsum_e1;
 
-				di_sq <= unsigned(signed(data_I) * signed(data_I));
-				dq_sq <= unsigned(signed(data_Q) * signed(data_Q));
+				di_sq <= resize(unsigned(signed(data_I) * signed(data_I)), 2*DATA_W -1);
+				dq_sq <= resize(unsigned(signed(data_Q) * signed(data_Q)), 2*DATA_W -1);
 
 				IF IQ_MOD THEN
 
-					dsum <= resize(shift_right(di_sq + dq_sq, 0), DATA_W*2);
+					dsum <= resize(shift_right(di_sq + dq_sq, 0), 2*DATA_W -1);
 
 				ELSIF I_USED THEN
 
-					dsum <= resize(shift_right(di_sq, 0), DATA_W*2);
+					dsum <= resize(shift_right(di_sq, 0), 2*DATA_W -1);
 
 				ELSE -- Q_USED
 
-					dsum <= resize(shift_right(dq_sq, 0), DATA_W*2);
+					dsum <= resize(shift_right(dq_sq, 0), 2*DATA_W -1);
 
 				END IF;
 
@@ -142,20 +144,36 @@ BEGIN
 		END IF;
 	END PROCESS input_proc;
 
-	u_ema : ENTITY work.lowpass_ema(rtl)
+	u_ema_1 : ENTITY work.lowpass_ema(rtl)
 	GENERIC MAP (
-		DATA_W 	=> DATA_W*2,
-		ALPHA_W => ALPHA_W,
-		AVG_W  	=> DATA_W*2+8
+		DATA_W 	=> 2*DATA_W -1,
+		ALPHA_W => ALPHA_W
 	)
 	PORT MAP (
 		clk				=> clk,
 		init			=> init,
 
-		alpha 			=> alpha,
+		alpha 			=> alpha1,
 
 		data 			=> std_logic_vector(dsum),
 		data_ena 		=> dsum_e2,
+
+		average 		=> ema_1
+	);
+
+	u_ema_2 : ENTITY work.lowpass_ema(rtl)
+	GENERIC MAP (
+		DATA_W 	=> 2*DATA_W -1,
+		ALPHA_W => ALPHA_W
+	)
+	PORT MAP (
+		clk				=> clk,
+		init			=> init,
+
+		alpha 			=> alpha2,
+
+		data 			=> ema_1,
+		data_ena 		=> '1',
 
 		average 		=> power_squared
 	);

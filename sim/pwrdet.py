@@ -167,16 +167,17 @@ async def pwrdet_sin_cos_test(dut):
 
     plot = False
 
-    run_time = 100000 # microseconds
+    run_time = 500000 # microseconds
 
     alpha = 0.1
 
-    clock_freq = 1.25e6
+    clock_freq = 1e6
     clock_per = int(round(1/(clock_freq)*1e9))
 
     rt_freq = 433000 
 
-    dut.alpha.value = 1
+    dut.alpha1.value = 64
+    dut.alpha2.value = 64
     dut.init.value = 1
     dut.data_I.value = 0
     dut.data_Q.value = 0
