@@ -1,0 +1,81 @@
+[*]
+[*] GTKWave Analyzer v3.4.0 (w)1999-2022 BSI
+[*] Thu Jan  2 07:36:26 2025
+[*]
+[dumpfile] "power_detector.ghw"
+[dumpfile_mtime] "Thu Jan  2 06:58:21 2025"
+[dumpfile_size] 33806308
+[savefile] "/Users/nonlinear/Dev/pluto_msk/power_detector/sim/pwrdet.gtkw"
+[timestart] 0
+[size] 1296 600
+[pos] -1 -1
+*-42.600876 9971000000000 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[treeopen] power_detector.
+[sst_width] 253
+[signals_width] 324
+[sst_expanded] 1
+[sst_vpaned_height] 159
+@28
+power_detector.clk
+power_detector.init
+@200
+-DATA INPUT
+@28
+power_detector.data_ena
+@c10420
+power_detector.data_i[11:0]
+@28
+(0)power_detector.data_i[11:0]
+(1)power_detector.data_i[11:0]
+(2)power_detector.data_i[11:0]
+(3)power_detector.data_i[11:0]
+(4)power_detector.data_i[11:0]
+(5)power_detector.data_i[11:0]
+(6)power_detector.data_i[11:0]
+(7)power_detector.data_i[11:0]
+(8)power_detector.data_i[11:0]
+(9)power_detector.data_i[11:0]
+(10)power_detector.data_i[11:0]
+(11)power_detector.data_i[11:0]
+@1401200
+-group_end
+@20000
+-
+@10420
++{DATA_SQUARED} power_detector.di_sq[22:0]
+@20000
+-
+@200
+-EMA STAGE 1
+@421
+power_detector.alpha1[17:0]
+@10420
++{EMA_STAGE_1_SQUARED[22:0]} power_detector.ema_1[22:0]
+@20000
+-
+@10022
++{EMA_STAGE_1_SQRT} power_detector.u_ema_1.avg_real
+@20000
+-
+@10022
++{EMA_STAGE_1_RMS_in_dB} power_detector.u_ema_1.avg_rms
+@20000
+-
+@200
+-EMA STAGE 2
+@420
+power_detector.alpha2[17:0]
+@10420
++{EMA_STAGE_2_SQUARED} power_detector.power_squared[22:0]
+@20000
+-
+@10022
++{EMA_STAGE_2_SQRT} power_detector.u_ema_2.avg_real
+@20000
+-
+@10022
++{EMA_STAGE_2_RMS_in_dB} power_detector.u_ema_2.avg_rms
+@20000
+-
+[pattern_trace] 1
+[pattern_trace] 0
