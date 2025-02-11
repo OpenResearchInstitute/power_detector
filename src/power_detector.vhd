@@ -74,7 +74,8 @@ ENTITY power_detector IS
 		ALPHA_W 		: NATURAL := 18;
 		IQ_MOD 			: BOOLEAN := False;
 		I_USED 			: BOOLEAN := True;
-		Q_USED 			: BOOLEAN := False
+		Q_USED 			: BOOLEAN := False;
+		EMA_CASCADE		: BOOLEAN := True
 	);
 	PORT (
 		clk				: IN  std_logic;
@@ -106,6 +107,9 @@ ARCHITECTURE rtl OF power_detector IS
 	SIGNAL dsum_e1  : std_logic;
 	SIGNAL dsum_e2  : std_logic;
 	SIGNAL ema_1	: std_logic_vector(2*DATA_W -2 DOWNTO 0);
+	SIGNAL ema_1_ena: std_logic;
+	SIGNAL ema_2 	: std_logic_vector(2*DATA_W -2 DOWNTO 0);
+	SIGNAL ema_2_ena: std_logic;
 
 BEGIN 
 
@@ -158,25 +162,31 @@ BEGIN
 		data 			=> std_logic_vector(dsum),
 		data_ena 		=> dsum_e2,
 
-		average 		=> ema_1
+		average 		=> ema_1,
+		average_ena 	=> ema_1_ena
 	);
 
-	u_ema_2 : ENTITY work.lowpass_ema(rtl)
-	GENERIC MAP (
-		DATA_W 	=> 2*DATA_W -1,
-		ALPHA_W => ALPHA_W
-	)
-	PORT MAP (
-		clk				=> clk,
-		init			=> init,
+	ema_2_cascade: IF EMA_CASCADE GENERATE
+		u_ema_2 : ENTITY work.lowpass_ema(rtl)
+		GENERIC MAP (
+			DATA_W 	=> 2*DATA_W -1,
+			ALPHA_W => ALPHA_W
+		)
+		PORT MAP (
+			clk				=> clk,
+			init			=> init,
+	
+			alpha 			=> alpha2,
+	
+			data 			=> ema_1,
+			data_ena 		=> ema_1_ena,
+	
+			average 		=> ema_2,
+			average_ena		=> ema_2_ena
+		);
+	END GENERATE;
 
-		alpha 			=> alpha2,
-
-		data 			=> ema_1,
-		data_ena 		=> '1',
-
-		average 		=> power_squared
-	);
+	power_squared <= ema_2 WHEN EMA_CASCADE ELSE ema_1;
 
 END ARCHITECTURE rtl;
 
