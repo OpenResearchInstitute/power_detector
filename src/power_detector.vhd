@@ -147,11 +147,13 @@ BEGIN
 			END IF;
 		END IF;
 	END PROCESS input_proc;
-
 	u_ema_1 : ENTITY work.lowpass_ema(rtl)
 	GENERIC MAP (
-		DATA_W 	=> 2*DATA_W -1,
-		ALPHA_W => ALPHA_W
+		DATA_W   => 2*DATA_W -1,
+		ALPHA_W  => ALPHA_W,
+		MULT_A_W => 2*DATA_W -1 + 2,                -- DATA_W + 2 (matches lowpass_ema default ratio: 25 = 23 + 2)
+		MULT_B_W => ALPHA_W,
+		PROD_W   => (2*DATA_W -1) + 2 + ALPHA_W     -- = MULT_A_W + MULT_B_W
 	)
 	PORT MAP (
 		clk				=> clk,
@@ -169,8 +171,11 @@ BEGIN
 	ema_2_cascade: IF EMA_CASCADE GENERATE
 		u_ema_2 : ENTITY work.lowpass_ema(rtl)
 		GENERIC MAP (
-			DATA_W 	=> 2*DATA_W -1,
-			ALPHA_W => ALPHA_W
+			DATA_W   => 2*DATA_W -1,
+			ALPHA_W  => ALPHA_W,
+			MULT_A_W => 2*DATA_W -1 + 2,                -- DATA_W + 2 (matches lowpass_ema default ratio: 25 = 23 + 2)
+			MULT_B_W => ALPHA_W,
+			PROD_W   => (2*DATA_W -1) + 2 + ALPHA_W     -- = MULT_A_W + MULT_B_W
 		)
 		PORT MAP (
 			clk				=> clk,
