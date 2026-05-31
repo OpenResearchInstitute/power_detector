@@ -88,7 +88,16 @@ ENTITY power_detector IS
 		data_Q			: IN  std_logic_vector(DATA_W -1 DOWNTO 0);
 		data_ena		: IN  std_logic;
 
-		power_squared	: OUT std_logic_vector(2*DATA_W -2 DOWNTO 0)
+		power_squared	: OUT std_logic_vector(2*DATA_W -2 DOWNTO 0);
+
+
+        -- Phase B silicon bring-up: internal cascade taps for ILA
+        dbg_dsum		: OUT std_logic_vector(2*DATA_W -2 DOWNTO 0);
+        dbg_dsum_e2		: OUT std_logic;
+        dbg_ema_1		: OUT std_logic_vector(2*DATA_W -2 DOWNTO 0);
+        dbg_ema_1_ena	: OUT std_logic
+
+
 	);
 END ENTITY power_detector;
 
@@ -192,6 +201,12 @@ BEGIN
 	END GENERATE;
 
 	power_squared <= ema_2 WHEN EMA_CASCADE ELSE ema_1;
+
+        -- Phase B silicon bring-up: internal cascade taps for ILA
+        dbg_dsum		: OUT std_logic_vector(2*DATA_W -2 DOWNTO 0);
+        dbg_dsum_e2		: OUT std_logic;
+        dbg_ema_1		: OUT std_logic_vector(2*DATA_W -2 DOWNTO 0);
+        dbg_ema_1_ena	: OUT std_logic
 
 END ARCHITECTURE rtl;
 
