@@ -90,14 +90,13 @@ ENTITY power_detector IS
 
 		power_squared	: OUT std_logic_vector(2*DATA_W -2 DOWNTO 0);
 
-
-        -- Phase B silicon bring-up: internal cascade taps for ILA
-        dbg_dsum		: OUT std_logic_vector(2*DATA_W -2 DOWNTO 0);
-        dbg_dsum_e2		: OUT std_logic;
-        dbg_ema_1		: OUT std_logic_vector(2*DATA_W -2 DOWNTO 0);
-        dbg_ema_1_ena	: OUT std_logic
-
-
+		-- EMA-internal observability for the channel-0 ILA. Pure passthrough
+		-- outputs; unconnected in sim (read via hierarchy), wired to the ILA
+		-- on the hardware build. Declared ONCE.
+		dbg_dsum		: OUT std_logic_vector(2*DATA_W -2 DOWNTO 0);
+		dbg_dsum_e2		: OUT std_logic;
+		dbg_ema_1		: OUT std_logic_vector(2*DATA_W -2 DOWNTO 0);
+		dbg_ema_1_ena	: OUT std_logic
 	);
 END ENTITY power_detector;
 
@@ -202,13 +201,10 @@ BEGIN
 
 	power_squared <= ema_2 WHEN EMA_CASCADE ELSE ema_1;
 
-        -- Phase B silicon bring-up: internal cascade taps for ILA
-        dbg_dsum		: OUT std_logic_vector(2*DATA_W -2 DOWNTO 0);
-        dbg_dsum_e2		: OUT std_logic;
-        dbg_ema_1		: OUT std_logic_vector(2*DATA_W -2 DOWNTO 0);
-        dbg_ema_1_ena	: OUT std_logic
+	-- Debug passthroughs (channel-0 ILA / sim observability)
+	dbg_dsum      <= std_logic_vector(dsum);
+	dbg_dsum_e2   <= dsum_e2;
+	dbg_ema_1     <= ema_1;
+	dbg_ema_1_ena <= ema_1_ena;
 
 END ARCHITECTURE rtl;
-
-
-
